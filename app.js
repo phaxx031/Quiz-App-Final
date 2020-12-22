@@ -56,12 +56,35 @@ const STORE = {
   score: 0,
 };
 
-function generateQuestion() {
-
+function renderQuiz() {
+  console.log('`renderQuiz` ran');
+  generateQuizInterface();
 }
 
-function renderQuestion() {
-  console.log('`renderQuestion` ran');
+function generateQuizInitialState() {
+  return `
+    <div id="start-quiz-container">
+      <div class="border text-centered red-container background">
+        <p>Click the Start button if you are ready to take the ultimate video game quiz!</p>
+      </div>
+      <div class="controls text-centered">
+      <button id="start-btn" class="start-btn btn button1">Start</button>
+    </div>
+  </div>`
+}
+
+function handleStartQuiz() {
+  $('#start-btn').click(function(event) {
+    $('main').html('<h2 id="question-number">Question <span></span> </h2>');
+    $('main').append('<h2 id="quiz-score">Score: <span>0</span> out of 5</h2>');
+    $('main').append('<div id="question" class="border2 red-containerbackground hide"></div>')
+    $('main').append('<form class="hide" id="form"> <ul> <li><input type="radio" name="choice" value="a"><span id="first_answer"></span></li> <li><input type="radio" name="choice" value="b"><span id="second_answer"></span></li> <li><input type="radio" name="choice" value="c"><span id="third_answer"></span></li> <li><input type="radio" name="choice" value="d"><span id="fourth_answer"></span></li> </ul> <input id="submit-btn" type="submit" class="submit-btn btn button1" value="Submit"> </form>')
+  });
+  generateQuizInterface();
+}
+
+function generateQuizInterface() {
+  
 }
 
 function IsCorrectQuestion() {
@@ -73,17 +96,14 @@ function handleSubmitAnswer() {
 
 }
 
-function handleStartQuiz() {
-
-}
-
-function generateQuizInitialState() {
-  ("#main-id").append("Click the Start button below if you are ready to take the ultimate video game quiz");
-}
-
 function init() {
+  let startingQuizInterfaceString = generateQuizInitialState();
+  $('main').html(startingQuizInterfaceString);
+  handleStartQuiz();
 
 }
+
+$(init);
 
 //submit button event and click for the start button
 
@@ -115,3 +135,8 @@ function init() {
 /********** EVENT HANDLER FUNCTIONS **********/
 
 // These functions handle events (submit, click, etc)
+
+/*
+  $('main').append('<div id="question" class="border2 red-containerbackground hide"></div>')
+  $('main').append('<form class="hide" id="form"> <ul> <li><input type="radio" name="choice" value="a"><span id="first_answer"></span></li> <li><input type="radio" name="choice" value="b"><span id="second_answer"></span></li> <li><input type="radio" name="choice" value="c"><span id="third_answer"></span></li> <li><input type="radio" name="choice" value="d"><span id="fourth_answer"></span></li> </ul> <input id="submit-btn" type="submit" class="submit-btn btn button1" value="Submit"> </form>')
+*/
