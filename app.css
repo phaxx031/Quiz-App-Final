@@ -79,10 +79,6 @@ h3 {
 
 /* The above is formatting stuff, below is more of colors and display stuff*/
 
-#question-container {
-  display: none;
-}
-
 .red-containerbackground {
   background-color: #FF4500;
 }
@@ -93,4 +89,23 @@ body {
 
 .button1 {
   background-color: #F4A460;
+}
+
+.final-score {
+  padding: 40 px;
+  font-size: 32 px;
+}
+
+ul, #isCorrect {
+  display: inline-block;
+}
+
+#dynamic {
+  position: relative;
+}
+
+#isCorrect {
+  position: absolute;
+  left: 40%;
+  top: 40%;
 }

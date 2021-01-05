@@ -53,15 +53,11 @@ const STORE = {
   ],
   quizStarted: false,
   questionNumber: 0,
+  index: 0,
   score: 0,
 };
 
-function renderQuiz() {
-  console.log('`renderQuiz` ran');
-  generateQuizInterface();
-}
-
-function generateQuizInitialState() {
+function generateQuizInitialStateInterfaceString() {
   return `
     <div id="start-quiz-container">
       <div class="border text-centered red-container background">
@@ -73,70 +69,137 @@ function generateQuizInitialState() {
   </div>`
 }
 
-function handleStartQuiz() {
-  $('#start-btn').click(function(event) {
-    $('main').html('<h2 id="question-number">Question <span></span> </h2>');
-    $('main').append('<h2 id="quiz-score">Score: <span>0</span> out of 5</h2>');
-    $('main').append('<div id="question" class="border2 red-containerbackground hide"></div>')
-    $('main').append('<form class="hide" id="form"> <ul> <li><input type="radio" name="choice" value="a"><span id="first_answer"></span></li> <li><input type="radio" name="choice" value="b"><span id="second_answer"></span></li> <li><input type="radio" name="choice" value="c"><span id="third_answer"></span></li> <li><input type="radio" name="choice" value="d"><span id="fourth_answer"></span></li> </ul> <input id="submit-btn" type="submit" class="submit-btn btn button1" value="Submit"> </form>')
-  });
-  generateQuizInterface();
+function generateTemplateQuestionInterfaceString() {
+  return `
+  <div id="question-container">
+    <h2 id="question-number">Question <span>1</span></h2>
+    <h2 id="quiz-score">Score: <span>0</span> out of 5</h2>
+    <div id="question" class="border2 red-containerbackground hide">What is the best selling video game console of all time?</div>
+    <form class="hide" id="form">
+      <div id="dynamic">
+      </div>
+      <input id="submit-btn" type="submit" class="submit-btn btn button1" value="Submit Answer">
+    </form>
+  </div>
+  `;
 }
 
-function generateQuizInterface() {
-  
+function generateTemplatePossibleAnswersInterfaceString(index) {
+  return `
+    <ul>
+      <li><input type="radio" name="choice" value="a"><span id="first_answer">${STORE.questions[index].answers[0]}</span></li>
+      <li><input type="radio" name="choice" value="b"><span id="second_answer">${STORE.questions[index].answers[1]}</span></li>
+      <li><input type="radio" name="choice" value="c"><span id="third_answer">${STORE.questions[index].answers[2]}</span></li>
+      <li><input type="radio" name="choice" value="d"><span id="fourth_answer">${STORE.questions[index].answers[3]}</span></li>
+    </ul>
+    <div id="isCorrect">
+  </div>
+  `
 }
 
-function IsCorrectQuestion() {
-
+function renderTemplateQuestionInterfaceString() {
+  let templateQuestionInterfaceString = generateTemplateQuestionInterfaceString();
+    templatePossibleAnswersInterfaceString = generateTemplatePossibleAnswersInterfaceString(0);
+  $('main').html(templateQuestionInterfaceString);
+  $('form div#dynamic').html(templatePossibleAnswersInterfaceString);
 }
-// this function above is whether question is correct or not
+
+function renderNextQuestion(index) {
+  let questionNumber = index + 1;
+  renderQuestionNumber(questionNumber);
+  renderQuestionText(index);
+  renderPossibleAnswers(index);
+}
+
+function renderQuestionNumber(questionNumber) {
+  $('#question-number span').text(questionNumber);
+}
+
+function renderQuestionText(index) {
+  $('#question').text(STORE.questions[index].question);
+}
+
+function renderPossibleAnswers(index) {
+  let possibleAnswersInterfaceString = generateTemplatePossibleAnswersInterfaceString(index);
+  $('form div#dynamic').html(possibleAnswersInterfaceString);
+}
+
+function renderScore() {
+  $('#quiz-score span').text(STORE.score);
+}
+
+function renderFinalScore(finalScore) {
+  $('form div#dynamic').html('<br>');
+  $('#question-number').text('');
+  $('#quiz-score').text('');
+  $('#question').addClass('final-score');
+  $('#question').text(`FINAL SCORE: ${finalScore} out of 5`);
+  $('#submit-btn').val('Restart Quiz');
+}
+
+function isCorrectAnswer() {
+  let isCorrectAnswer = false;
+  if ($('input[type=radio]:checked').siblings().text() == STORE.questions[STORE.index].correctAnswer) {
+    isCorrectAnswer = true;
+  }
+  return isCorrectAnswer;
+}
 
 function handleSubmitAnswer() {
+  $('form').submit(function(event) {
+    event.preventDefault();
+    if (STORE.index < STORE.questions.length) {
+      $('#submit-btn').prop('disabled', 'true');
+      if (isCorrectAnswer()) {
+        STORE.score++;
+        $('#isCorrect').text('CORRECT');
+      } else {
+        $('#isCorrect').text(`INCORRECT! The correct answer is "${STORE.questions[STORE.index].correctAnswer}"`);
+      }
+      setTimeout(function(){
+        renderScore();
+        clearCheckedRadioButton();
+        STORE.index++;
+        if (STORE.index < STORE.questions.length) {
+          renderNextQuestion(STORE.index);
+        } else {
+          renderFinalScore(STORE.score);
+        }
+        $('#submit-btn').removeAttr('disabled');
+      }, 2000);
+    } else {
+      resetQuizData();
+      renderNextQuestion(STORE.index);
+      return;
+    }
+  });
+}
 
+function resetQuizData() {
+  STORE.index = 0;
+  STORE.score = 0;
+  $('#submit-btn').val('Submit Answer');
+  $('#question').removeClass('final-score');
+  $('#quiz-score').html('Score: <span>0</span> out of 5');
+  $('#question-number').html('Question <span>1</span>');
+  renderScore();
+}
+
+function clearCheckedRadioButton() {
+  $('input[type=radio]:checked').prop('checked', false);
+}
+
+function handleStartQuiz() {
+  $('#start-btn').click(function (event) {
+    renderTemplateQuestionInterfaceString();
+    handleSubmitAnswer();
+  });
 }
 
 function init() {
-  let startingQuizInterfaceString = generateQuizInitialState();
-  $('main').html(startingQuizInterfaceString);
+  let quizInitialStateInterfaceString = generateQuizInitialStateInterfaceString();
+  $('main').html(quizInitialStateInterfaceString);
   handleStartQuiz();
-
 }
 
 $(init);
-
-//submit button event and click for the start button
-
-// final is the init function that we previously have
-
-/**
- * 
- * Technical requirements:
- * 
- * Your app should include a render() function, that regenerates the view each time the store is updated. 
- * See your course material and access support for more details.
- *
- * NO additional HTML elements should be added to the index.html file.
- *
- * You may add attributes (classes, ids, etc) to the existing HTML elements, or link stylesheets or additional scripts if necessary
- *
- * SEE BELOW FOR THE CATEGORIES OF THE TYPES OF FUNCTIONS YOU WILL BE CREATING 👇
- * 
- */
-
-/********** TEMPLATE GENERATION FUNCTIONS **********/
-
-// These functions return HTML templates
-
-/********** RENDER FUNCTION(S) **********/
-
-// This function conditionally replaces the contents of the <main> tag based on the state of the store
-
-/********** EVENT HANDLER FUNCTIONS **********/
-
-// These functions handle events (submit, click, etc)
-
-/*
-  $('main').append('<div id="question" class="border2 red-containerbackground hide"></div>')
-  $('main').append('<form class="hide" id="form"> <ul> <li><input type="radio" name="choice" value="a"><span id="first_answer"></span></li> <li><input type="radio" name="choice" value="b"><span id="second_answer"></span></li> <li><input type="radio" name="choice" value="c"><span id="third_answer"></span></li> <li><input type="radio" name="choice" value="d"><span id="fourth_answer"></span></li> </ul> <input id="submit-btn" type="submit" class="submit-btn btn button1" value="Submit"> </form>')
-*/
